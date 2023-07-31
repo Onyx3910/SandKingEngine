@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Windows.UI;
 using Windows.UI.Xaml;
 using static SandKing.Simulation.Elements;
+using static System.Collections.Specialized.BitVector32;
 
 namespace SandKing.Simulation
 {
@@ -77,7 +78,7 @@ namespace SandKing.Simulation
 
         public bool IsEmpty(int x, int y) => InBounds(x, y) && (_cells[x, y] == Empty);
 
-        public virtual void Update()
+        public virtual void Update(CanvasDrawingSession session)
         {
             var points = new List<List<(int x, int y)>>();
 
@@ -111,6 +112,8 @@ namespace SandKing.Simulation
                     if (canMoveDown && MoveDown(x, y, cell)) { }
                     else if (canMoveDownSide && MoveDownSide(x, y, cell)) { }
                     else if (canMoveSide && MoveSide(x, y, cell)) { }
+
+                    session.FillRectangle(x * CellWidth, y * CellHeight, CellWidth, CellHeight, cell.Color);
                 }
             }
         }
@@ -118,21 +121,7 @@ namespace SandKing.Simulation
         public virtual void Simulate(CanvasDrawingSession session) 
         {
             if (MouseDown) PlaceCell();
-            Update();
-            Display(session);
-        }
-
-        protected void Display(CanvasDrawingSession session)
-        {
-            for (var x = 0; x < _cells.GetLength(0); x++)
-            {
-                for (var y = 0; y < _cells.GetLength(1); y++)
-                {
-                    var cell = _cells[x, y];
-                    if (cell == Empty) continue;
-                    session.FillRectangle(x * CellWidth, y * CellHeight, CellWidth, CellHeight, cell.Color);
-                }
-            }
+            Update(session);
         }
 
         protected void MoveCell(int xFrom, int yFrom, int xTo, int yTo, Cell cell)
