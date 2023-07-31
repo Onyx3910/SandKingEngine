@@ -24,19 +24,32 @@ namespace SandKing.Engine
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        public ISimulation _fallingSand = new FallingSand(5, 5);
+        public ISimulation _fallingSand = new FallingSand(3, 3);
 
         public MainPage()
         {
             this.InitializeComponent();
+
+            Window.Current.CoreWindow.KeyDown += (window, args) =>
+            {
+                if (args.VirtualKey == Windows.System.VirtualKey.Number0)
+                    ((FallingSand)_fallingSand).CellToPlace = Elements.Empty;
+                if (args.VirtualKey == Windows.System.VirtualKey.Number1)
+                    ((FallingSand)_fallingSand).CellToPlace = Elements.Sand;
+                if (args.VirtualKey == Windows.System.VirtualKey.Number2)
+                    ((FallingSand)_fallingSand).CellToPlace = Elements.Water;
+                if (args.VirtualKey == Windows.System.VirtualKey.Number3)
+                    ((FallingSand)_fallingSand).CellToPlace = Elements.Stone;
+            };
+
             Window.Current.CoreWindow.PointerPressed += (window, args) =>
             {
-                ((FallingSand)_fallingSand).PlacingSand = true;
+                ((FallingSand)_fallingSand).MouseDown = true;
             };
 
             Window.Current.CoreWindow.PointerReleased += (window, args) =>
             {
-                ((FallingSand)_fallingSand).PlacingSand = false;
+                ((FallingSand)_fallingSand).MouseDown = false;
             };
         }
 
