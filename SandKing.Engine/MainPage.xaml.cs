@@ -1,5 +1,7 @@
 ﻿using Microsoft.Graphics.Canvas.UI.Xaml;
 using SandKing.Simulation;
+using SandKing.Simulation.Materials;
+using SandKing.Simulation.Materials.Enums;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -24,7 +26,7 @@ namespace SandKing.Engine
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        public ISimulation _fallingSand = new FallingSand(3, 3);
+        public ISimulation _fallingSand = new FallingSand();
 
         public MainPage()
         {
@@ -33,13 +35,13 @@ namespace SandKing.Engine
             Window.Current.CoreWindow.KeyDown += (window, args) =>
             {
                 if (args.VirtualKey == Windows.System.VirtualKey.Number0)
-                    ((FallingSand)_fallingSand).CellToPlace = Elements.Empty;
+                    ((FallingSand)_fallingSand).MaterialToPlace = MaterialType.None;
                 if (args.VirtualKey == Windows.System.VirtualKey.Number1)
-                    ((FallingSand)_fallingSand).CellToPlace = Elements.Sand;
+                    ((FallingSand)_fallingSand).MaterialToPlace = MaterialType.Sand;
                 if (args.VirtualKey == Windows.System.VirtualKey.Number2)
-                    ((FallingSand)_fallingSand).CellToPlace = Elements.Water;
+                    ((FallingSand)_fallingSand).MaterialToPlace = MaterialType.Water;
                 if (args.VirtualKey == Windows.System.VirtualKey.Number3)
-                    ((FallingSand)_fallingSand).CellToPlace = Elements.Stone;
+                    ((FallingSand)_fallingSand).MaterialToPlace = MaterialType.Stone;
             };
 
             Window.Current.CoreWindow.PointerPressed += (window, args) =>

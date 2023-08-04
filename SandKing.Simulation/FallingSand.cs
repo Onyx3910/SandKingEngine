@@ -1,51 +1,56 @@
 ﻿using Microsoft.Graphics.Canvas;
+using SandKing.Physics;
+using SandKing.Simulation.Materials;
+using SandKing.Simulation.Materials.Base;
+using SandKing.Simulation.Materials.Enums;
+using SandKing.Simulation.Materials.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
+using System.Numerics;
 using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using Windows.UI;
+//using tainicom.Aether.Physics2D.Common;
+//using tainicom.Aether.Physics2D.Dynamics;
+using VectorInt;
 using Windows.UI.Xaml;
-using static SandKing.Simulation.Elements;
-using static System.Collections.Specialized.BitVector32;
 
 namespace SandKing.Simulation
 {
     public class FallingSand : ISimulation
     {
-        const int DefaultCellWidth = 2;
-        const int DefaultCellHeight = 2;
-
         private static FallingSand _instance;
 
-        protected Cell[,] _cells;
+        protected IMaterial[,] _grid;
 
-        public FallingSand() : this(DefaultCellWidth, DefaultCellHeight) { }
-
-        public FallingSand(int cellWidth, int cellHeight)
+        public FallingSand()
         {
-            CellWidth = cellWidth;
-            CellHeight = cellHeight;
-
             var coreWindow = Window.Current.CoreWindow;
             var screenWidth = (int)coreWindow.Bounds.Width;
             var screenHeight = (int)coreWindow.Bounds.Height;
-            var cellsWidth = screenWidth / cellWidth;
-            var cellsHeight = screenHeight / cellHeight;
+            var cellsWidth = screenWidth / Material.Size;
+            var cellsHeight = screenHeight / Material.Size;
 
-            _cells = new Cell[cellsWidth, cellsHeight];
+            _grid = new IMaterial[cellsWidth, cellsHeight];
 
             Instance = this;
+
+            World = new World(cellsWidth, cellsHeight, new Vector2(0f, 9.80665f));
+            var sand1 = new Sand(this, (50, 0))
+            {
+                IsParticle = true
+            };
+
+            var sand2 = new Sand(this, (50, cellsHeight - 1))
+            {
+                IsParticle = false
+            };
         }
 
-        public Cell CellToPlace { get; set; }
+        public World World { get; }
+        public MaterialType MaterialToPlace { get; set; }
         public bool MouseDown { get; set; }
         public int BrushSize { get; set; } = 10;
-        public int CellWidth { get; }
-        public int CellHeight { get; }
-        public Cell[,] Cells => _cells;
+        public IMaterial[,] Grid => _grid;
 
         public static FallingSand Instance
         {
@@ -62,34 +67,51 @@ namespace SandKing.Simulation
 
         public void PlaceCell()
         {
-            var mouseX = (int)(Window.Current.CoreWindow.PointerPosition.X - Window.Current.Bounds.X) / CellWidth;
-            var mouseY = (int)(Window.Current.CoreWindow.PointerPosition.Y - Window.Current.Bounds.Y) / CellHeight;
+            var mouseX = (int)(Window.Current.CoreWindow.PointerPosition.X - Window.Current.Bounds.X) / Material.Size;
+            var mouseY = (int)(Window.Current.CoreWindow.PointerPosition.Y - Window.Current.Bounds.Y) / Material.Size;
             for (var x = mouseX - BrushSize / 2; x < mouseX + BrushSize / 2; x++)
             { 
                 for(var y = mouseY - BrushSize / 2; y < mouseY + BrushSize / 2; y++)
                 {
-                    if (CellToPlace != Empty && (!IsEmpty(x, y) || !InBounds(x, y))) continue;
-                    _cells[x, y] = CellToPlace;
+                    if (MaterialToPlace != MaterialType.None && (!IsEmpty(x, y) || !InBounds(x, y))) continue;
+                    switch (MaterialToPlace)
+                    {
+                        case MaterialType.None:
+                            Grid[x, y] = null;
+                            break;
+                        case MaterialType.Sand:
+                            new Sand(this, (x, y))
+                            {
+                                IsParticle = true
+                            };
+                            break;
+                        case MaterialType.Water:
+                            new Water(this, (x, y));
+                            break;
+                        case MaterialType.Stone:
+                            new Stone(this, (x, y));
+                            break;
+                    }
                 }
             }
         }
 
-        public bool InBounds(int x, int y) => x >= 0 && y >= 0 && x < Cells.GetLength(0) && y < Cells.GetLength(1);
+        public bool InBounds(int x, int y) => x >= 0 && y >= 0 && x < Grid.GetLength(0) && y < Grid.GetLength(1);
 
-        public bool IsEmpty(int x, int y) => InBounds(x, y) && (_cells[x, y] == Empty);
+        public bool IsEmpty(int x, int y) => InBounds(x, y) && (_grid[x, y] == null);
 
         public virtual void Update(CanvasDrawingSession session)
         {
-            var points = new List<List<(int x, int y)>>();
+            var points = new List<List<VectorInt2>>();
 
-            for (var y = _cells.GetLength(1) - 1; y >= 0; y--)
+            for (var y = _grid.GetLength(1) - 1; y >= 0; y--)
             {
-                var row = new List<(int x, int y)>();
-                for (var x = 0; x < _cells.GetLength(0); x++)
+                var row = new List<VectorInt2>();
+                for (var x = 0; x < _grid.GetLength(0); x++)
                 {
-                    var cell = _cells[x, y];
-                    if (cell == Empty) continue;
-                    row.Add((x, y));
+                    var material = _grid[x, y];
+                    if (material == null) continue;
+                    row.Add(new VectorInt2(x, y));
                 }
                 if(row.Count > 0) points.Add(row);
             }
@@ -98,84 +120,21 @@ namespace SandKing.Simulation
             {
                 foreach (var index in Enumerable.Range(0, row.Count).OrderBy(x => new Random().Next()))
                 {
-                    var point = row[index];
+                    var position = row[index];
+                    var material = _grid[position.X, position.Y];
 
-                    var (x, y) = point;
-                    var cell = _cells[x, y];
+                    if (material == null) return;
 
-                    if (cell == Empty) return;
-
-                    var canMoveDown = cell.HasProperty(CellProperties.MoveDown);
-                    var canMoveDownSide = cell.HasProperty(CellProperties.MoveDownSide);
-                    var canMoveSide = cell.HasProperty(CellProperties.MoveSide);
-
-                    if (canMoveDown && MoveDown(x, y, cell)) { }
-                    else if (canMoveDownSide && MoveDownSide(x, y, cell)) { }
-                    else if (canMoveSide && MoveSide(x, y, cell)) { }
-
-                    session.FillRectangle(x * CellWidth, y * CellHeight, CellWidth, CellHeight, cell.Color);
+                    material.Update(session);
                 }
             }
         }
 
         public virtual void Simulate(CanvasDrawingSession session) 
         {
+            World.Step(1f / 60f);
             if (MouseDown) PlaceCell();
             Update(session);
-        }
-
-        protected void MoveCell(int xFrom, int yFrom, int xTo, int yTo, Cell cell)
-        {
-            _cells[xTo, yTo] = cell;
-            _cells[xFrom, yFrom] = Empty;
-        }
-
-        protected bool MoveDown(int x, int y, Cell cell)
-        {
-            var down = IsEmpty(x, y + 1);
-            if(down) MoveCell(x, y, x, y + 1, cell);
-            return down;
-        }
-
-        protected bool MoveDownSide(int x, int y, Cell cell)
-        {
-            var leftX = x - 1;
-            var rightX = x + 1;
-            var downY = y + 1;
-
-            var downLeft = IsEmpty(leftX, downY);
-            var downRight = IsEmpty(rightX, downY);
-
-            if (downLeft && downRight)
-            {
-                downLeft = new Random().Next() >= int.MaxValue / 2;
-                downRight = !downLeft;
-            }
-
-            if (downLeft) MoveCell(x, y, leftX, downY, cell);
-            else if (downRight) MoveCell(x, y, rightX, downY, cell);
-
-            return downLeft || downRight;
-        }
-
-        protected bool MoveSide(int x, int y, Cell cell)
-        {
-            var leftX = x - 1;
-            var rightX = x + 1;
-
-            var left = IsEmpty(leftX, y);
-            var right = IsEmpty(rightX, y);
-
-            if (left && right)
-            {
-                left = new Random().Next() >= int.MaxValue / 2;
-                right = !left;
-            }
-
-            if (left) MoveCell(x, y, leftX, y, cell);
-            else if (right) MoveCell(x, y, rightX, y, cell);
-
-            return left || right;
         }
     }
 }
