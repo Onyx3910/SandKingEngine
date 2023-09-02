@@ -8,7 +8,12 @@ namespace SandKing.Simulation.Materials.Base
     {
         public static readonly VectorInt2 Down = new VectorInt2(0, 1);
 
-        protected FallingMaterial(ISimulation simulation, VectorInt2 position, float density) : base(simulation, position, density) { }
+        public override void TrySetActive()
+        {
+            if (IsActive) return;
+        }
+
+        protected FallingMaterial(ISimulation simulation, VectorInt2 position, float density, bool debug = false) : base(simulation, position, density, debug) { }
 
         protected virtual bool TryMoveDown(out VectorInt2 outLocation)
         {

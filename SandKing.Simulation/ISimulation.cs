@@ -1,14 +1,16 @@
-﻿using Microsoft.Graphics.Canvas;
-using SandKing.Physics;
+﻿using SandKing.Physics;
 using SandKing.Simulation.Materials.Interfaces;
-//using tainicom.Aether.Physics2D.Dynamics;
 
 namespace SandKing.Simulation
 {
     public interface ISimulation
     {
+        bool Debug { get; set; }
+        Camera Camera { get; }
         World World { get; }
+        Chunk[,] Chunks { get; }
         IMaterial[,] Grid { get; }
-        void Simulate(CanvasDrawingSession session);
+        void Simulate();
+        void ToggleDebug();
     }
 }

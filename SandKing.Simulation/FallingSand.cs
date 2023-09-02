@@ -8,11 +8,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Runtime.CompilerServices;
-//using tainicom.Aether.Physics2D.Common;
-//using tainicom.Aether.Physics2D.Dynamics;
 using VectorInt;
 using Windows.UI.Xaml;
+using Windows.UI.Xaml.Input;
 
 namespace SandKing.Simulation
 {
@@ -22,8 +20,14 @@ namespace SandKing.Simulation
 
         protected IMaterial[,] _grid;
 
-        public FallingSand()
+        public FallingSand(int chunkLength = 1, bool debug = false)
         {
+            if (_instance != null) throw new Exception("Only one instance of FallingSand is allowed.");
+
+            _instance = this;
+
+            Debug = debug;
+
             var coreWindow = Window.Current.CoreWindow;
             var screenWidth = (int)coreWindow.Bounds.Width;
             var screenHeight = (int)coreWindow.Bounds.Height;
@@ -34,19 +38,33 @@ namespace SandKing.Simulation
 
             Instance = this;
 
+            Camera = new Camera(cellsWidth, cellsHeight, new Vector2(0, 0), 1f);
             World = new World(cellsWidth, cellsHeight, new Vector2(0f, 9.80665f));
-            var sand1 = new Sand(this, (50, 0))
+            Chunks = new Chunk[chunkLength, chunkLength];
+            Chunk.Width = cellsWidth / chunkLength;
+            Chunk.Height = cellsHeight / chunkLength;
+            for(var i = 0; i < chunkLength; i++)
+            {
+                for(var j = 0; j < chunkLength; j++)
+                {
+                    Chunks[i, j] = new Chunk(this, (i * Chunk.Width, j * Chunk.Height));
+                }
+            }
+
+            _ = new Sand(this, (50, 0))
             {
                 IsParticle = true
             };
-
-            var sand2 = new Sand(this, (50, cellsHeight - 1))
+            _ = new Sand(this, (50, cellsHeight - 1))
             {
                 IsParticle = false
             };
         }
 
+        public bool Debug { get; set; }
+        public Camera Camera { get; }
         public World World { get; }
+        public Chunk[,] Chunks { get; }
         public MaterialType MaterialToPlace { get; set; }
         public bool MouseDown { get; set; }
         public int BrushSize { get; set; } = 10;
@@ -56,7 +74,6 @@ namespace SandKing.Simulation
         {
             get
             {
-                if(_instance == null) _instance = new FallingSand();
                 return _instance;
             }
             private set
@@ -80,16 +97,13 @@ namespace SandKing.Simulation
                             Grid[x, y] = null;
                             break;
                         case MaterialType.Sand:
-                            new Sand(this, (x, y))
-                            {
-                                IsParticle = true
-                            };
+                            new Sand(this, (x, y), Debug);
                             break;
                         case MaterialType.Water:
-                            new Water(this, (x, y));
+                            new Water(this, (x, y), Debug);
                             break;
                         case MaterialType.Stone:
-                            new Stone(this, (x, y));
+                            new Stone(this, (x, y), Debug);
                             break;
                     }
                 }
@@ -100,41 +114,40 @@ namespace SandKing.Simulation
 
         public bool IsEmpty(int x, int y) => InBounds(x, y) && (_grid[x, y] == null);
 
-        public virtual void Update(CanvasDrawingSession session)
+        public virtual void Update()
         {
-            var points = new List<List<VectorInt2>>();
-
-            for (var y = _grid.GetLength(1) - 1; y >= 0; y--)
+            var random = new Random();
+            foreach (var x in Enumerable.Range(0, Grid.GetLength(0)).OrderBy(num => random.Next()))
             {
-                var row = new List<VectorInt2>();
-                for (var x = 0; x < _grid.GetLength(0); x++)
+                foreach(var y in Enumerable.Range(0, Grid.GetLength(1)).OrderBy(num => random.Next()))
                 {
-                    var material = _grid[x, y];
-                    if (material == null) continue;
-                    row.Add(new VectorInt2(x, y));
-                }
-                if(row.Count > 0) points.Add(row);
-            }
-
-            foreach (var row in points)
-            {
-                foreach (var index in Enumerable.Range(0, row.Count).OrderBy(x => new Random().Next()))
-                {
-                    var position = row[index];
-                    var material = _grid[position.X, position.Y];
-
-                    if (material == null) return;
-
-                    material.Update(session);
+                    if (Grid[x, y] is null) continue;
+                    Grid[x, y].Update();
                 }
             }
         }
 
-        public virtual void Simulate(CanvasDrawingSession session) 
+        public virtual void Simulate() 
         {
             World.Step(1f / 60f);
             if (MouseDown) PlaceCell();
-            Update(session);
+            Update();
+        }
+
+        public void ToggleDebug()
+        {
+            Debug = !Debug;
+
+            foreach (var chunk in Chunks)
+            {
+                chunk.Debug = Debug;
+            }
+
+            foreach (var material in _grid)
+            {
+                if (material == null) continue;
+                material.Debug = Debug;
+            }
         }
     }
 }

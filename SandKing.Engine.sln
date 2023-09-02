@@ -5,9 +5,9 @@ VisualStudioVersion = 17.6.33829.357
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SandKing.Engine", "SandKing.Engine\SandKing.Engine.csproj", "{6C6E31B3-3984-4C67-B16D-5DF956A0E2EA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SandKing.Simulation", "SandKing.Simulation\SandKing.Simulation.csproj", "{99DEA931-BB14-465E-988E-D6CFDAA18A0C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SandKing.Simulation", "SandKing.Simulation\SandKing.Simulation.csproj", "{99DEA931-BB14-465E-988E-D6CFDAA18A0C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SandKing.Physics", "SandKing.Physics\SandKing.Physics.csproj", "{96EC94DD-01A6-489E-AF03-A9D4723D25C4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SandKing.Physics", "SandKing.Physics\SandKing.Physics.csproj", "{96EC94DD-01A6-489E-AF03-A9D4723D25C4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

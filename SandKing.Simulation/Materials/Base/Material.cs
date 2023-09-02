@@ -12,39 +12,66 @@ namespace SandKing.Simulation.Materials.Base
     {
         public const int Size = 5;
 
-        public Material(ISimulation simulation, Vector2 position, float density) : base(position, 0.5f)
+        public Material(ISimulation simulation, Vector2 position, float density, bool debug = false) : base(position, 0.5f)
         {
             LastGridPosition = position;
             Density = density;
+            Debug = debug;
 
             simulation.World.Insert(this);
             Simulation = simulation;
             Simulation.Grid[(int)position.X, (int)position.Y] = this;
+
+            AssignToChunk();
         }
 
-        //public bool IsActive { get; set; }
+        public bool Debug { get; set; }
+        public Chunk Chunk { get; private set; }
+        public bool IsActive { get; set; } = true;
         public VectorInt2 GridPosition => new VectorInt2(Position);
         public VectorInt2 LastGridPosition { get; private set; }
         public float Density { get; }
         public virtual Color Color { get; protected set; }
         public ISimulation Simulation { get; }
 
-        public virtual void Update(CanvasDrawingSession session)
+        public virtual void Update()
         {
             EarlyUpdate();
-            if(!IsParticle) SimulateFallingSand();
-            Draw(session);
+            if (Debug) Color = Colors.Red;
+            if (!IsParticle)
+            {
+                TrySetActive();
+                if (IsActive) SimulateFallingSand();
+                if (Debug) Color = Colors.Green;
+                if (LastGridPosition == GridPosition)
+                {
+                    IsActive = false;
+                    if (Debug) Color = Colors.DarkGray;
+                }
+            }
+
             LateUpdate();
+        }
+
+        public abstract void TrySetActive();
+
+        public abstract void TryDislodge();
+
+        public virtual void AssignToChunk()
+        {
+            var x = GridPosition.X / Chunk.Width;
+            var y = GridPosition.Y / Chunk.Height;
+            Chunk = Simulation.Chunks[x, y];
+            Chunk.Materials.Add(this);
+            Chunk.IsDirty = IsParticle || IsActive;
         }
 
         protected virtual void EarlyUpdate()
         {
             Simulation.Grid[LastGridPosition.X, LastGridPosition.Y] = null;
-            //if (LastGridPosition == GridPosition) return;
 
             if (IsParticle)
             {
-                Color = Colors.Red;
                 var locationBeforeCollision = BresenhamTraversal(LastGridPosition, GridPosition, out var collision);
                 if (collision != new VectorInt2(-1, -1) && (!InBounds(collision) || !Simulation.Grid[collision.X, collision.Y].IsParticle))
                 {
@@ -54,18 +81,18 @@ namespace SandKing.Simulation.Materials.Base
 
                 Position = new Vector2(locationBeforeCollision.X, locationBeforeCollision.Y);
             }
-            else Color = Colors.Green;
         }
 
-        protected virtual void Draw(CanvasDrawingSession session)
+        public virtual void Draw(CanvasDrawingSession session)
         {
-            session.FillRectangle(Position.X * Size, Position.Y * Size, Size, Size, Color);
+            if (Simulation.Camera.IsInView(this)) session.FillRectangle(Position.X * Size, Position.Y * Size, Size, Size, Color);
         }
 
         protected virtual void LateUpdate()
         {
             Simulation.Grid[GridPosition.X, GridPosition.Y] = this;
             LastGridPosition = GridPosition;
+            AssignToChunk();
         }
 
         protected abstract void SimulateFallingSand();
@@ -87,7 +114,7 @@ namespace SandKing.Simulation.Materials.Base
         protected bool InBounds(VectorInt2 pos) => pos.X >= 0 && pos.Y >= 0 && pos.X < Simulation.Grid.GetLength(0) && pos.Y < Simulation.Grid.GetLength(1);
         protected bool IsEmpty(VectorInt2 pos) => InBounds(pos) && (Simulation.Grid[pos.X, pos.Y] == null);
 
-        protected VectorInt2 BresenhamTraversal(VectorInt2 start, VectorInt2 end, out VectorInt2 pointOfCollision)
+        protected VectorInt2 BresenhamTraversal(VectorInt2 start, VectorInt2 end, out VectorInt2 pointOfCollision, Func<VectorInt2, bool> breakEarlyFunc = null)
         {
             // See: https://stackoverflow.com/questions/11678693/all-cases-covered-bresenhams-line-algorithm
             pointOfCollision = Vector2.One * -1;
@@ -110,7 +137,7 @@ namespace SandKing.Simulation.Materials.Base
             int numerator = longest >> 1;
             for (int i = 0; i <= longest; i++)
             {
-                //putpixel(x, y, color);
+                if (breakEarlyFunc != null && breakEarlyFunc.Invoke(start)) break;
                 numerator += shortest;
                 if (!(numerator < longest))
                 {

@@ -8,8 +8,10 @@ namespace SandKing.Simulation.Materials
 {
     public class Water : Liquid
     {
-        public Water(ISimulation simulation, VectorInt2 position = default) : base(simulation, position, 1000f, dispersionRate: 5) { }
+        public Water(ISimulation simulation, VectorInt2 position = default, bool debug = false) : base(simulation, position, 1000f, dispersionRate: 5, debug) { }
 
-        public override Color Color => Colors.Blue;
+        public override double InertialResistance => 0.0D;
+
+        public override Color Color => Debug ? base.Color : Colors.Blue;
     }
 }

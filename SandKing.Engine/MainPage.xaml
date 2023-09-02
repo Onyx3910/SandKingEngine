@@ -9,6 +9,35 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
-        <Canvas:CanvasControl x:Name="canvas" Draw="Canvas_Draw"/>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <!--<RowDefinition />
+            <RowDefinition />
+            <RowDefinition />-->
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <!--<ColumnDefinition />
+            <ColumnDefinition />
+            <ColumnDefinition />-->
+        </Grid.ColumnDefinitions>
+        <Canvas:CanvasControl x:Name="Chunk_0x0" Draw="Chunk_0x0_Draw" Grid.Row="0" Grid.Column="0"/>
+        <!--<Canvas:CanvasControl x:Name="Chunk_0x1" Draw="Chunk_0x1_Draw" Grid.Row="0" Grid.Column="1"/>
+        <Canvas:CanvasControl x:Name="Chunk_0x2" Draw="Chunk_0x2_Draw" Grid.Row="0" Grid.Column="2"/>
+        <Canvas:CanvasControl x:Name="Chunk_0x3" Draw="Chunk_0x3_Draw" Grid.Row="0" Grid.Column="3"/>
+        <Canvas:CanvasControl x:Name="Chunk_1x0" Draw="Chunk_1x0_Draw" Grid.Row="1" Grid.Column="0"/>
+        <Canvas:CanvasControl x:Name="Chunk_1x1" Draw="Chunk_1x1_Draw" Grid.Row="1" Grid.Column="1"/>
+        <Canvas:CanvasControl x:Name="Chunk_1x2" Draw="Chunk_1x2_Draw" Grid.Row="1" Grid.Column="2"/>
+        <Canvas:CanvasControl x:Name="Chunk_1x3" Draw="Chunk_1x3_Draw" Grid.Row="1" Grid.Column="3"/>
+        <Canvas:CanvasControl x:Name="Chunk_2x0" Draw="Chunk_2x0_Draw" Grid.Row="2" Grid.Column="0"/>
+        <Canvas:CanvasControl x:Name="Chunk_2x1" Draw="Chunk_2x1_Draw" Grid.Row="2" Grid.Column="1"/>
+        <Canvas:CanvasControl x:Name="Chunk_2x2" Draw="Chunk_2x2_Draw" Grid.Row="2" Grid.Column="2"/>
+        <Canvas:CanvasControl x:Name="Chunk_2x3" Draw="Chunk_2x3_Draw" Grid.Row="2" Grid.Column="3"/>
+        <Canvas:CanvasControl x:Name="Chunk_3x0" Draw="Chunk_3x0_Draw" Grid.Row="3" Grid.Column="0"/>
+        <Canvas:CanvasControl x:Name="Chunk_3x1" Draw="Chunk_3x1_Draw" Grid.Row="3" Grid.Column="1"/>
+        <Canvas:CanvasControl x:Name="Chunk_3x2" Draw="Chunk_3x2_Draw" Grid.Row="3" Grid.Column="2"/>
+        <Canvas:CanvasControl x:Name="Chunk_3x3" Draw="Chunk_3x3_Draw" Grid.Row="3" Grid.Column="3"/>-->
+        <Canvas:CanvasControl x:Name="Simulation" Draw="Simulation_Draw"/>
     </Grid>
 </Page>

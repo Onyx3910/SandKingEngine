@@ -1,6 +1,7 @@
 ﻿using Microsoft.Graphics.Canvas;
 using SandKing.Simulation.Materials.Interfaces;
 using System;
+using System.Diagnostics;
 using System.Numerics;
 using VectorInt;
 
@@ -8,23 +9,33 @@ namespace SandKing.Simulation.Materials.Base
 {
     public abstract class Liquid : FallingMaterial, ILiquid
     {
-        public Liquid(ISimulation simulation, VectorInt2 position, float density, int dispersionRate) : base(simulation, position, density) 
+        public Liquid(ISimulation simulation, VectorInt2 position, float density, int dispersionRate, bool debug = false) : base(simulation, position, density, debug) 
         {
             DispersionRate = dispersionRate;
         }
 
         public int DispersionRate { get; }
 
-        public override void Update(CanvasDrawingSession session)
+        public override void TrySetActive()
         {
-            base.Update(session);
+            base.TrySetActive();
+            if (IsEmpty(GridPosition + Down) || 
+                IsEmpty(GridPosition + VectorInt2.Left) || 
+                IsEmpty(GridPosition + VectorInt2.Right) || 
+                IsEmpty(GridPosition + Down + VectorInt2.Left) || 
+                IsEmpty(GridPosition + Down + VectorInt2.Right)) IsActive = true;
+        }
+
+        public override void Update()
+        {
+            base.Update();
         }
 
         protected override void SimulateFallingSand()
         {
             if (TryMoveDown(out var location)) { IsParticle = true; }
-            else if (TryMoveDownSide(GridPosition, out location)) { IsParticle = true; }
-            else if (TryMoveSide(GridPosition, out location)) { IsParticle = true; }
+            else if (TryMoveDownSide(GridPosition, out location)) { }
+            else if (TryMoveSide(GridPosition, out location)) { }
             else { location = GridPosition; }
             Position = location;
         }
