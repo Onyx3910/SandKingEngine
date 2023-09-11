@@ -15,6 +15,7 @@ namespace SandKing.Engine
             Engine.Input.SubscribeMouseReleased((sender, e) => StopPlace(e));
         }
 
+        public int BrushSize { get; protected set; } = 2;
         public bool PlacingMaterials { get; protected set; }
 
         public override void Run()
@@ -25,10 +26,17 @@ namespace SandKing.Engine
             }
         }
 
-        public static void PlaceMaterial()
+        public void PlaceMaterial()
         {
             var mousePosition = Engine.Input.GetMousePosition();
-            Engine.Simulation.Add(new Sand(new Vector2(mousePosition.X / Material.Size, mousePosition.Y / Material.Size)));
+            var gridPosition = new Vector2(mousePosition.X / Material.Size, mousePosition.Y / Material.Size);
+            for(var x = gridPosition.X - BrushSize / 2; x < gridPosition.X + BrushSize; x++)
+            {
+                for (var y = gridPosition.Y - BrushSize / 2; y < gridPosition.Y + BrushSize; y++)
+                {
+                    Engine.Simulation.Add(new Sand(new Vector2(x, y)));
+                }
+            }
         }
 
         protected virtual void ToggleDebug(KeyEventArgs e)
@@ -41,7 +49,7 @@ namespace SandKing.Engine
 
         protected void StartPlace(MouseButtonEventArgs e)
         {
-            if (e.Button == Mouse.Button.Left)
+            if (Engine.Debug && e.Button == Mouse.Button.Left)
             {
                 PlacingMaterials = true;
             }
@@ -49,7 +57,7 @@ namespace SandKing.Engine
 
         protected void StopPlace(MouseButtonEventArgs e)
         {
-            if (e.Button == Mouse.Button.Left)
+            if (Engine.Debug && e.Button == Mouse.Button.Left)
             {
                 PlacingMaterials = false;
             }

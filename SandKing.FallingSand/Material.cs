@@ -1,6 +1,7 @@
 ﻿using SandKing.Physics;
 using SFML.Graphics;
 using SFML.System;
+using System;
 using System.Numerics;
 using VectorInt;
 
@@ -38,6 +39,17 @@ namespace SandKing.FallingSand
             vertices[2] = new Vertex(new Vector2f(DisplayPosition.X + Size, DisplayPosition.Y + Size), Color);
             vertices[3] = new Vertex(new Vector2f(DisplayPosition.X,        DisplayPosition.Y + Size), Color);
             return vertices;
+        }
+
+        protected static Color RandomColorBetween(Color color1, Color color2)
+        {
+            var random = new Random();
+            return new Color(
+                (byte)random.Next(Math.Min(color1.R, color2.R), Math.Max(color1.R, color2.R)),
+                (byte)random.Next(Math.Min(color1.G, color2.G), Math.Max(color1.G, color2.G)),
+                (byte)random.Next(Math.Min(color1.B, color2.B), Math.Max(color1.B, color2.B)),
+                (byte)random.Next(Math.Min(color1.A, color2.A), Math.Max(color1.A, color2.A))
+            );
         }
     }
 }
