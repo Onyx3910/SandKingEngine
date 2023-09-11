@@ -1,8 +1,8 @@
-﻿using SandKing.Graphics;
-using SFML.System;
+﻿using SFML.System;
 using SFML.Window;
+using System;
 
-namespace SandKing.Engine
+namespace SandKing.Engine.Core
 {
     public class Input
     {
@@ -12,6 +12,31 @@ namespace SandKing.Engine
         }
 
         protected Display Display { get; set; }
+
+        public void SubscribeMouseReleased(EventHandler<MouseButtonEventArgs> handler)
+        {
+            Display.MouseButtonReleased += handler;
+        }
+
+        public void SubscribeMousePressed(EventHandler<MouseButtonEventArgs> handler)
+        {
+            Display.MouseButtonPressed += handler;
+        }
+
+        public void SubscribeMouseMoved(EventHandler<MouseMoveEventArgs> handler)
+        {
+            Display.MouseMoved += handler;
+        }
+
+        public void SubscribeKeyPressed(EventHandler<KeyEventArgs> handler)
+        {
+            Display.KeyPressed += handler;
+        }
+
+        public void SubscribeKeyReleased(EventHandler<KeyEventArgs> handler)
+        {
+            Display.KeyReleased += handler;
+        }
 
         public static bool IsKeyPressed(Keyboard.Key key)
         {

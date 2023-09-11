@@ -1,7 +1,7 @@
 ﻿using SFML.Graphics;
 using SFML.Window;
 
-namespace SandKing.Graphics
+namespace SandKing.Engine.Core
 {
     public class Display : RenderWindow
     {

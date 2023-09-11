@@ -1,5 +1,5 @@
-﻿using SandKing.FallingSand.Materials;
-using SandKing.Graphics;
+﻿using SandKing.Engine.Core;
+using SandKing.FallingSand.Materials;
 using System;
 using VectorInt;
 
@@ -37,6 +37,7 @@ namespace SandKing.FallingSand
         {
             foreach(var material in materials)
             {
+                if (!IsEmpty(material.MaterialPosition)) continue;
                 Materials[material.MaterialPosition.X, material.MaterialPosition.Y] = material;
             }
         }
@@ -46,11 +47,16 @@ namespace SandKing.FallingSand
             return position.X >= 0 && position.X < Materials.GetLength(0) && position.Y >= 0 && position.Y < Materials.GetLength(1);
         }
 
+        public bool IsEmpty(VectorInt2 position)
+        {
+            return IsInBounds(position) && Materials[position.X, position.Y] is null;
+        }
+
         private (int x, int y) Update(Material material)
         {
             if (material is null) return (-1, -1);
 
-            if (material.HasProperty(Property.MoveDown) && GetDown(material, out var down, out var bufferDown) && (down is null && bufferDown is null))
+            if (material.HasProperty(Property.MoveDown) && GetDown(material, out var down) && down is null)
             {
                 return MoveDown(material);
             }
@@ -203,7 +209,7 @@ namespace SandKing.FallingSand
             var (x, y) = material.MaterialPosition + VectorInt2.Up;
             if (IsInBounds(new VectorInt2(x, y)))
             {
-                up = Materials[x, y];
+                up = MaterialsBuffer[x, y];
                 return true;
             }
 
@@ -219,18 +225,16 @@ namespace SandKing.FallingSand
             return (x, y);
         }
 
-        private bool GetDown(Material material, out Material down, out Material bufferDown)
+        private bool GetDown(Material material, out Material down)
         {
             var (x, y) = material.MaterialPosition + VectorInt2.Down;
             if (IsInBounds(new VectorInt2(x, y)))
             {
                 down = Materials[x, y];
-                bufferDown = MaterialsBuffer[x, y];
                 return true;
             }
 
             down = OutOfBounds.Instance;
-            bufferDown = OutOfBounds.Instance;
             return false;
         }
 

@@ -12,6 +12,6 @@ namespace SandKing.Simulation.Materials
 
         public override double InertialResistance => 0.0D;
 
-        public override Color Color => Debug ? base.Color : Colors.Blue;
+        //public override Color Color => Debug ? base.Color : Colors.Blue;
     }
 }

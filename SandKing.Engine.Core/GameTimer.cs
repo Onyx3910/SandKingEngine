@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace RenderFramework.Test
+namespace SandKing.Engine.Core
 {
     public class GameTimer
     {

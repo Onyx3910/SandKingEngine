@@ -26,11 +26,11 @@ namespace SandKing.Simulation
 
         public void Draw(CanvasDrawingSession session)
         {
-            if(Debug)
-            {
-                var borderColor = IsDirty ? Windows.UI.Colors.Purple : Windows.UI.Colors.White;
-                session.DrawRectangle(Position.X * Material.Size, Position.Y * Material.Size, Width * Material.Size, Height * Material.Size, borderColor);
-            }
+            //if(Debug)
+            //{
+            //    var borderColor = IsDirty ? Windows.UI.Colors.Purple : Windows.UI.Colors.White;
+            //    session.DrawRectangle(Position.X * Material.Size, Position.Y * Material.Size, Width * Material.Size, Height * Material.Size, borderColor);
+            //}
 
             for(var index = 0; index < Materials.Count; index++)
             {

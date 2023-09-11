@@ -37,16 +37,16 @@ namespace SandKing.Simulation.Materials.Base
         public virtual void Update()
         {
             EarlyUpdate();
-            if (Debug) Color = Colors.Red;
+            //if (Debug) Color = Colors.Red;
             if (!IsParticle)
             {
                 TrySetActive();
                 if (IsActive) SimulateFallingSand();
-                if (Debug) Color = Colors.Green;
+                //if (Debug) Color = Colors.Green;
                 if (LastGridPosition == GridPosition)
                 {
                     IsActive = false;
-                    if (Debug) Color = Colors.DarkGray;
+                    //if (Debug) Color = Colors.DarkGray;
                 }
             }
 

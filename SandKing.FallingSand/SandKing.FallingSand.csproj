@@ -10,6 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SandKing.Engine.Core\SandKing.Engine.Core.csproj" />
     <ProjectReference Include="..\SandKing.Graphics\SandKing.Graphics.csproj" />
     <ProjectReference Include="..\SandKing.Physics\SandKing.Physics.csproj" />
   </ItemGroup>

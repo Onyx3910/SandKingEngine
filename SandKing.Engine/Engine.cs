@@ -1,7 +1,8 @@
-﻿using RenderFramework.Test;
+﻿using SandKing.Engine.Core;
 using SandKing.FallingSand;
-using SandKing.Graphics;
+using SandKing.FallingSand.Materials;
 using SandKing.Physics;
+using System;
 using System.Numerics;
 using System.Threading;
 
@@ -9,6 +10,7 @@ namespace SandKing.Engine
 {
     public static class Engine
     {
+        public static bool Debug { get; set; }
         public static Input Input { get; set; }
         public static GameTimer GameTimer { get; set; }
         public static Display Display { get; set; }
@@ -22,6 +24,7 @@ namespace SandKing.Engine
             Input = new Input(Display);
             World = new World(800 / Material.Size, 600 / Material.Size, new Vector2(0, 9.81f));
             Simulation = new Simulation(800 / Material.Size, 600 / Material.Size, Display);
+            _ = new DebugModeScript();
         }
 
         public static void Run()
@@ -29,6 +32,7 @@ namespace SandKing.Engine
             while (Display.IsOpen)
             {
                 //World.Step((float)GameTimer.DeltaTime);
+                ScriptManager.RunAll();
                 Simulation.Simulate();
                 Display.Update();
                 GameTimer.Update();

@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 
@@ -10,6 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SandKing.Engine.Core\SandKing.Engine.Core.csproj" />
     <ProjectReference Include="..\SandKing.FallingSand\SandKing.FallingSand.csproj" />
     <ProjectReference Include="..\SandKing.Graphics\SandKing.Graphics.csproj" />
     <ProjectReference Include="..\SandKing.Input\SandKing.Input.csproj" />
