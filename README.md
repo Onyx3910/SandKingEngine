@@ -1,2 +1,2 @@
 # SandKingEngine
-A game engine for making falling sand applications using SharpDX.
+A game engine for making falling sand applications using SFML.NET
